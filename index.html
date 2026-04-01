@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DrugMatch — A Drug Repurposing Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Bricolage+Grotesque:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --ink: #1A1A18;
+    --sage: #4A6741;
+    --sage-light: #E8EFE6;
+    --amber: #C4792A;
+    --amber-light: #FBF0E0;
+    --teal: #2A6B72;
+    --teal-light: #E0F0F2;
+    --rule: #D4CEC2;
+    --muted: #6B6860;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  nav {
+    border-bottom: 1px solid var(--rule);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--cream);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .nav-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--sage);
+  }
+  .nav-wordmark {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.01em;
+  }
+  .nav-tag {
+    margin-left: auto;
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border: 1px solid var(--rule);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 5rem 2rem 3rem;
+    opacity: 0;
+    transform: translateY(24px);
+    animation: rise 0.7s ease forwards;
+  }
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--sage);
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--sage);
+  }
+  .hero-desc {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 580px;
+    line-height: 1.75;
+    border-left: 2px solid var(--sage);
+    padding-left: 1.25rem;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    max-width: 860px;
+    margin: 3rem auto;
+    border: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  /* ── SECTION ── */
+  .section {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: rise 0.6s ease forwards;
+  }
+  .section:nth-child(3) { animation-delay: 0.15s; }
+  .section:nth-child(4) { animation-delay: 0.25s; }
+  .section:nth-child(5) { animation-delay: 0.35s; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .section h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+  .section p {
+    color: var(--muted);
+    max-width: 640px;
+    margin-bottom: 0.85rem;
+  }
+
+  /* ── HOW IT WORKS STEPS ── */
+  .steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 2rem;
+  }
+  .step {
+    background: var(--cream);
+    padding: 1.75rem 1.5rem;
+    position: relative;
+  }
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+  .step-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+  .step-icon.green  { background: var(--sage-light); }
+  .step-icon.amber  { background: var(--amber-light); }
+  .step-icon.teal   { background: var(--teal-light); }
+  .step h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+  .step p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  /* ── MATCH CARDS ── */
+  .matches-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 2rem;
+  }
+  .match-card {
+    background: var(--cream);
+    padding: 1.5rem 1.75rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 2rem;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .match-card:hover { background: #F0EBE0; }
+  .match-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+  }
+  .match-card.score-2::before { background: var(--sage); }
+  .match-card.score-1::before { background: var(--amber); }
+
+  .mc-field { display: flex; flex-direction: column; gap: 2px; }
+  .mc-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.63rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+  .mc-value {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .mc-explanation {
+    grid-column: 1 / -1;
+    background: var(--sage-light);
+    border-radius: 6px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.83rem;
+    color: var(--sage);
+    font-style: italic;
+  }
+  .score-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .score-pill.high { background: var(--sage-light); color: var(--sage); }
+  .score-pill.low  { background: var(--amber-light); color: var(--amber); }
+  .score-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .target-tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    background: var(--teal-light);
+    color: var(--teal);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin: 1px 2px 1px 0;
+  }
+
+  /* ── EXPLAINER ── */
+  .explainer {
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin-top: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .explainer::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: var(--sage);
+    opacity: 0.08;
+  }
+  .explainer h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.3rem;
+    margin-bottom: 0.75rem;
+    color: var(--cream);
+  }
+  .explainer p {
+    color: #A8A49C;
+    font-size: 0.9rem;
+    max-width: 580px;
+    margin-bottom: 0.75rem;
+  }
+  .explainer p:last-child { margin-bottom: 0; }
+  .explainer strong { color: var(--cream); font-weight: 500; }
+
+  /* ── FOOTER ── */
+  footer {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  @media (max-width: 640px) {
+    .steps { grid-template-columns: 1fr; }
+    .match-card { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-dot"></div>
+  <span class="nav-wordmark">DrugMatch</span>
+  <span class="nav-tag">Beginner Project</span>
+</nav>
+
+<div class="hero">
+  <p class="hero-label">// Drug repurposing explorer</p>
+  <h1>Finding <em>new cures</em><br>in existing drugs</h1>
+  <p class="hero-desc">
+    This system scans a small set of known drugs and diseases, then looks for hidden connections through shared biological targets — the same core idea behind EveryCure's AI platform.
+  </p>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <p class="section-label">// 01 — how it works</p>
+  <h2>Three dictionaries, one big idea</h2>
+  <p>The system stores three types of facts. Then it looks for overlap. When a drug and a disease share a biological target, a potential match is flagged.</p>
+
+  <div class="steps">
+    <div class="step">
+      <p class="step-num">Step 01</p>
+      <div class="step-icon green">💊</div>
+      <h3>Store what each drug already treats</h3>
+      <p>Metformin treats type 2 diabetes. Aspirin treats heart disease and pain. These are the known uses.</p>
+    </div>
+    <div class="step">
+      <p class="step-num">Step 02</p>
+      <div class="step-icon amber">🔬</div>
+      <h3>Map drugs and diseases to biological targets</h3>
+      <p>Metformin affects AMPK and mTOR. Alzheimer's also involves mTOR. That shared target is the clue.</p>
+    </div>
+    <div class="step">
+      <p class="step-num">Step 03</p>
+      <div class="step-icon teal">✦</div>
+      <h3>Score and rank every match</h3>
+      <p>More shared targets = higher score = stronger repurposing hypothesis. The best leads rise to the top.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <p class="section-label">// 02 — example output</p>
+  <h2>Matches found by the system</h2>
+  <p>These are real outputs from the Python program. Each match was discovered automatically — no one wrote these connections down.</p>
+
+  <div class="matches-grid">
+
+    <div class="match-card score-2">
+      <div class="mc-field">
+        <span class="mc-label">Drug</span>
+        <span class="mc-value">metformin</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">Currently treats</span>
+        <span class="mc-value">type 2 diabetes</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">May be repurposed for</span>
+        <span class="mc-value">Alzheimer's</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">Score</span>
+        <span class="score-pill high"><span class="score-dot"></span>2 shared targets</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">Shared biological targets</span>
+        <span><span class="target-tag">AMPK</span><span class="target-tag">mTOR</span></span>
+      </div>
+      <div class="mc-explanation">
+        Metformin may help treat Alzheimer's because both are connected to AMPK and mTOR.
+      </div>
+    </div>
+
+    <div class="match-card score-2">
+      <div class="mc-field">
+        <span class="mc-label">Drug</span>
+        <span class="mc-value">ibuprofen</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">Currently treats</span>
+        <span class="mc-value">pain, fever</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">May be repurposed for</span>
+        <span class="mc-value">lupus</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">Score</span>
+        <span class="score-pill high"><span class="score-dot"></span>2 shared targets</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">Shared biological targets</span>
+        <span><span class="target-tag">COX2</span><span class="target-tag">IL-6</span></span>
+      </div>
+      <div class="mc-explanation">
+        Ibuprofen may help treat lupus because both are connected to COX2 and IL-6.
+      </div>
+    </div>
+
+    <div class="match-card score-2">
+      <div class="mc-field">
+        <span class="mc-label">Drug</span>
+        <span class="mc-value">aspirin</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">Currently treats</span>
+        <span class="mc-value">heart disease, pain</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">May be repurposed for</span>
+        <span class="mc-value">rheumatoid arthritis</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">Score</span>
+        <span class="score-pill high"><span class="score-dot"></span>2 shared targets</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">Shared biological targets</span>
+        <span><span class="target-tag">COX2</span><span class="target-tag">NF-kB</span></span>
+      </div>
+      <div class="mc-explanation">
+        Aspirin may help treat rheumatoid arthritis because both are connected to COX2 and NF-kB.
+      </div>
+    </div>
+
+    <div class="match-card score-1">
+      <div class="mc-field">
+        <span class="mc-label">Drug</span>
+        <span class="mc-value">metformin</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">Currently treats</span>
+        <span class="mc-value">type 2 diabetes</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">May be repurposed for</span>
+        <span class="mc-value">cancer</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">Score</span>
+        <span class="score-pill low"><span class="score-dot"></span>1 shared target</span>
+      </div>
+      <div class="mc-field">
+        <span class="mc-label">Shared biological targets</span>
+        <span><span class="target-tag">mTOR</span></span>
+      </div>
+      <div class="mc-explanation">
+        Metformin may help treat cancer because both are connected to mTOR.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <p class="section-label">// 03 — the big picture</p>
+  <h2>Why this matters</h2>
+
+  <div class="explainer">
+    <h3>Drugs already on shelves could be treating diseases we haven't tried yet.</h3>
+    <p>Developing a brand new drug takes over a decade and costs billions of dollars. Most of that time is spent proving the drug is safe. But drugs already approved by the FDA have <strong>already passed safety testing</strong>.</p>
+    <p>If an approved drug shares a biological target with a disease it was never designed for, it might work — and it could reach patients <strong>years faster</strong> than a new drug would.</p>
+    <p>This tiny Python system demonstrates that idea in about 50 lines of beginner code. The real EveryCure platform does the same thing across <strong>4,000 drugs and 18,000 diseases</strong> — 75 million possible matches — using AI to score every single one.</p>
+  </div>
+</div>
+
+<footer>
+  <span>DrugMatch — a learning project inspired by EveryCure.org</span>
+  <span>Built with Python + HTML</span>
+</footer>
+
+</body>
+</html>
